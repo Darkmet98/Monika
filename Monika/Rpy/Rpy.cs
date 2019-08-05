@@ -47,7 +47,7 @@ namespace Monika.Rpy
 
             result += var[0] + "\r\n" + var[1] + "\r\n\r\n";
 
-            result += "    #" + var[2] + " \"" + OriginalText[i] + "\"\r\n";
+            result += "    #" + var[2] + " \"" + FixString(OriginalText[i]) + "\"\r\n";
 
             result += "   " + var[2] + " \"" + CheckTranslation(i) + "\"\r\n\r\n";
 
@@ -64,7 +64,7 @@ namespace Monika.Rpy
                 result += "translate Spanish strings:\r\n\r\n";
             }
             result += Variables[i] + "\r\n";
-            result += "    old \"" + OriginalText[i] + "\"\r\n";
+            result += "    old \"" + FixString(OriginalText[i]) + "\"\r\n";
             result += "    new \"" + CheckTranslation(i) + "\"\r\n\r\n";
 
             return result;
@@ -72,9 +72,13 @@ namespace Monika.Rpy
 
         private string CheckTranslation(int i)
         {
-            if (!TranslatedText[i].Equals("NULL")) return TranslatedText[i];
+            if (!TranslatedText[i].Equals("NULL")) return FixString(TranslatedText[i]);
             else return "";
         }
 
+        private string FixString(string text)
+        {
+            return text.Replace("\n", "\\n").Replace("\\\\", "\\");
+        }
     }
 }
