@@ -18,8 +18,10 @@
 
 using System;
 using System.IO;
+using System.Text;
 using Yarhl.FileFormat;
 using Yarhl.FileSystem;
+using Yarhl.IO;
 using Yarhl.Media.Text;
 
 namespace Monika
@@ -77,6 +79,27 @@ namespace Monika
                         Console.WriteLine("Importing " + args[1] + "...");
                         string file = args[1].Remove(args[1].Length - 3);
                         nodoFile.Stream.WriteTo(file + "_new.rpy");
+                    }
+                    break;
+                case "-port":
+                    if (File.Exists(args[1]) && File.Exists(args[2]))
+                    {
+                        // 1
+                        Node nodo = NodeFactory.FromFile(args[1]); // Po
+                        nodo.Transform<Po2Binary, BinaryFormat, Po>();
+
+                        // 2
+                        Lua.Po2Lua importer = new Lua.Po2Lua
+                        {
+                            LuaFile = new Yarhl.IO.TextReader(new DataStream(args[2], FileOpenMode.Read), Encoding.UTF8)
+                        };
+
+                        Node nodoDat = nodo.Transform(importer);
+
+                        //3
+                        Console.WriteLine("Importing " + args[1] + "...");
+                        string file = args[1].Remove(args[1].Length - 4);
+                        nodoDat.Stream.WriteTo(file + "_new.lua");
                     }
                     break;
             }
