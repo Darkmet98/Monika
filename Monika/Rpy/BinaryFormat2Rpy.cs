@@ -26,6 +26,7 @@ namespace Monika.Rpy
     {
         TextReader Reader;
         Rpy Result;
+        string Variable;
 
         public Rpy Convert(BinaryFormat source)
         {
@@ -57,13 +58,12 @@ namespace Monika.Rpy
                     else
                     {
                         //Read the two variables
-                        string variable = Reader.ReadLine() + "|" + Reader.ReadLine() + "|";
+                        Variable = Reader.ReadLine() + "|" + Reader.ReadLine() + "|";
                         Reader.ReadLine();
                         Reader.ReadToToken("#");
                         string name = Reader.ReadToToken("\"");
-                        variable += name;
-                        Result.Variables.Add(variable);
-
+                        Variable += name;
+                        
                         //Esto es temporal, luego añado un diccionario con nombres y demas, por ahora voy a centrarme nada mas que en ddlc
                         if (name.Contains("s")) Result.Names.Add("Sayori");
                         else if(name.Contains("mc")) Result.Names.Add("Main Character");
@@ -73,8 +73,9 @@ namespace Monika.Rpy
                         else Result.Names.Add("Narrator");
 
                         ReadTextToTranslate();
+                        Result.Variables.Add(Variable);
                     }
-
+                    Variable = "";
                 }
                 else Reader.ReadLine();
             }
@@ -87,14 +88,26 @@ namespace Monika.Rpy
         {
             //Original text
             string text = Reader.ReadLine();
-            Result.OriginalText.Add(text.Remove(text.Length-1));
+            if(text.Remove(0,text.Length - 1).Equals("\"")) Result.OriginalText.Add(text.Remove(text.Length-1));
+            else
+            {
+                int final_position = text.IndexOf("\" ");
+                Result.OriginalText.Add(text.Remove(final_position));
+                Variable += "|" + text.Remove(0, final_position+1);
+            }
 
             //Skip the white line and the first values
             Reader.ReadToToken("\"");
 
             //Translated text
             text = Reader.ReadLine();
-            Result.TranslatedText.Add(text.Remove(text.Length - 1));
+            if (text.Remove(0, text.Length - 1).Equals("\"")) Result.TranslatedText.Add(text.Remove(text.Length - 1));
+            else
+            {
+                int final_position = text.IndexOf("\" ");
+                if(final_position == 0) Result.TranslatedText.Add(text.Remove(final_position));
+                else Result.TranslatedText.Add(text.Remove(final_position));
+            }
         }
     }
 }

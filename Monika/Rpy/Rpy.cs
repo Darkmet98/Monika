@@ -47,9 +47,18 @@ namespace Monika.Rpy
 
             result += var[0] + "\r\n" + var[1] + "\r\n\r\n";
 
-            result += "    #" + var[2] + " \"" + FixString(OriginalText[i]) + "\"\r\n";
+            if(var.Length == 4)
+            {
+                result += "    #" + var[2] + "\"" + FixString(OriginalText[i]) + "\""+ var[3] + "\r\n";
 
-            result += "   " + var[2] + " \"" + CheckTranslation(i) + "\"\r\n\r\n";
+                result += "   " + var[2] + "\"" + CheckTranslation(i) + "\"" + var[3] + "\r\n\r\n";
+            }
+            else
+            {
+                result += "    #" + var[2] + "\"" + FixString(OriginalText[i]) + "\"\r\n";
+
+                result += "   " + var[2] + "\"" + CheckTranslation(i) + "\"\r\n\r\n";
+            }
 
             return result;
         }
