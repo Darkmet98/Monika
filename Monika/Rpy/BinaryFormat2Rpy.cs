@@ -19,14 +19,17 @@
 using System.Text;
 using Yarhl.FileFormat;
 using Yarhl.IO;
+using Yarhl.Media.Text;
 
 namespace Monika.Rpy
 {
     class BinaryFormat2Rpy : IConverter<BinaryFormat, Rpy>
     {
-        TextReader Reader;
-        Rpy Result;
-        string Variable;
+        TextReader Reader { get; set; }
+        Rpy Result { get; set; }
+        string Variable { get; set; }
+        public Po PoFix { get; set; }
+        int Count { get; set; }
 
         public Rpy Convert(BinaryFormat source)
         {
@@ -36,6 +39,8 @@ namespace Monika.Rpy
             //Skip the first line
             Reader.ReadLine();
 
+            //Initialize the Count
+            Count = 0;
             do
             {
                 if (!string.IsNullOrEmpty(Reader.PeekLine()))
@@ -63,7 +68,7 @@ namespace Monika.Rpy
                         Reader.ReadToToken("#");
                         string name = Reader.ReadToToken("\"");
                         Variable += name;
-                        
+
                         //Esto es temporal, luego añado un diccionario con nombres y demas, por ahora voy a centrarme nada mas que en ddlc
                         if (name.Contains("s")) Result.Names.Add("Sayori");
                         else if(name.Contains("mc")) Result.Names.Add("Main Character");
@@ -72,10 +77,30 @@ namespace Monika.Rpy
                         else if (name.Contains("n")) Result.Names.Add("Natsuki");
                         else Result.Names.Add("Narrator");
 
+                        //Temporal, solo para el juego este de Sakura Sadist
+                        /*if (name.Contains("m")) Result.Names.Add("Mamiko");
+                        else if(name.Contains("a")) Result.Names.Add("Azusa");
+                        else if (name.Contains("ma")) Result.Names.Add("Mari");
+                        else if (name.Contains("marilyn")) Result.Names.Add("Marilyn");
+                        else if (name.Contains("marilyn_")) Result.Names.Add("Marilyn Mari");
+                        else if (name.Contains("w")) Result.Names.Add("???");
+                        else if (name.Contains("tm")) Result.Names.Add("Twintailed maid");
+                        else if (name.Contains("c")) Result.Names.Add("Customer #1");
+                        else if (name.Contains("cc")) Result.Names.Add("Customer #2");
+                        else if (name.Contains("ccc")) Result.Names.Add("Customer #3");
+                        else if (name.Contains("s")) Result.Names.Add("Professor Shibata");
+                        else if (name.Contains("dad")) Result.Names.Add("Dad");
+                        else if (name.Contains("mom")) Result.Names.Add("Mom");
+                        else if (name.Contains("k")) Result.Names.Add("Kotoko");
+                        else if (name.Contains("maid")) Result.Names.Add("Maid");
+                        else if (name.Contains("li")) Result.Names.Add("Librarian");
+                        else Result.Names.Add("Narrator");*/
+
                         ReadTextToTranslate();
                         Result.Variables.Add(Variable);
                     }
                     Variable = "";
+                    Count++;
                 }
                 else Reader.ReadLine();
             }
@@ -99,14 +124,23 @@ namespace Monika.Rpy
             //Skip the white line and the first values
             Reader.ReadToToken("\"");
 
-            //Translated text
-            text = Reader.ReadLine();
-            if (text.Remove(0, text.Length - 1).Equals("\"")) Result.TranslatedText.Add(text.Remove(text.Length - 1));
+
+            if(PoFix == null)
+            {
+                //Translated text
+                text = Reader.ReadLine();
+                if (text.Remove(0, text.Length - 1).Equals("\"")) Result.TranslatedText.Add(text.Remove(text.Length - 1));
+                else
+                {
+                    int final_position = text.IndexOf("\" ");
+                    if (final_position == 0) Result.TranslatedText.Add(text.Remove(final_position));
+                    else Result.TranslatedText.Add(text.Remove(final_position));
+                }
+            }
             else
             {
-                int final_position = text.IndexOf("\" ");
-                if(final_position == 0) Result.TranslatedText.Add(text.Remove(final_position));
-                else Result.TranslatedText.Add(text.Remove(final_position));
+                Reader.ReadLine();
+                Result.TranslatedText.Add(PoFix.Entries[Count].Translated);
             }
         }
     }

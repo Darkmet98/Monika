@@ -36,7 +36,9 @@ namespace Monika
             {
                 Console.WriteLine("\nUsage: Monika.exe <-export/-import>");
                 Console.WriteLine("Export Rpy to Po: Monika.exe -export \"script-ch0.rpy\"");
-                Console.WriteLine("Export Po to Rpy: Monika.exe -import \"script-ch0.po\"'");
+                Console.WriteLine("Export Po to Rpy: Monika.exe -import \"script-ch0.po\"");
+                Console.WriteLine("Fix Po import if the translation program (Like PoEdit) broke the Po: Monika.exe -import \"script-ch0.po\" \"script-ch0.rpy\"");
+                Console.WriteLine("Port Po to Luke DDLC's Lua file: Monika.exe -port \"script-ch0.po\" \"script-ch0.lua\"");
                 return;
             }
             switch (args[0])
@@ -71,6 +73,33 @@ namespace Monika
                         // 2
                         IConverter<Po, Rpy.Rpy> PoConverter = new Rpy.Po2Rpy { };
                         Node nodoRpy = nodo.Transform(PoConverter);
+
+                        // 3
+                        IConverter<Rpy.Rpy, BinaryFormat> RpyConverter = new Rpy.Rpy2BinaryFormat { };
+                        Node nodoFile = nodoRpy.Transform(RpyConverter);
+                        //3
+                        Console.WriteLine("Importing " + args[1] + "...");
+                        string file = args[1].Remove(args[1].Length - 3);
+                        nodoFile.Stream.WriteTo(file + "_new.rpy");
+                    }
+                    break;
+                case "-fix_import":
+                    if (File.Exists(args[1]) && File.Exists(args[2]))
+                    {
+                        // 1
+                        Node nodoPo = NodeFactory.FromFile(args[1]); // Po
+                        nodoPo.Transform<Po2Binary, BinaryFormat, Po>();
+
+                        Node nodoOr = NodeFactory.FromFile(args[2]); // BinaryFormat
+
+
+                        // 2
+                        IConverter<BinaryFormat, Rpy.Rpy> TextConverter = new Rpy.BinaryFormat2Rpy {
+
+                            PoFix = nodoPo.GetFormatAs<Po>()
+
+                        };
+                        Node nodoRpy = nodoOr.Transform(TextConverter);
 
                         // 3
                         IConverter<Rpy.Rpy, BinaryFormat> RpyConverter = new Rpy.Rpy2BinaryFormat { };
