@@ -19,14 +19,17 @@
 using System;
 using System.IO;
 using System.Text;
+using Monika.Lua;
+using Monika.Rpy;
 using Yarhl.FileFormat;
 using Yarhl.FileSystem;
 using Yarhl.IO;
 using Yarhl.Media.Text;
+using TextReader = Yarhl.IO.TextReader;
 
 namespace Monika
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
@@ -34,110 +37,130 @@ namespace Monika
             Console.WriteLine("This program is licensed with a GPL V3 license.");
             if (args.Length != 1 && args.Length != 2 && args.Length != 3)
             {
-                Console.WriteLine("\nUsage: Monika <-export/-import> <language>");
-                Console.WriteLine("Export Rpy to Po: Monika -export \"script-ch0.rpy\"");
-                Console.WriteLine("Export Po to Rpy: Monika -import \"script-ch0.po\"");
-                Console.WriteLine("Fix Po import if the translation program (Like PoEdit) broke the Po: Monika -fix_import \"script-ch0.po\" \"script-ch0.rpy\"");
-                Console.WriteLine("Port Po to Luke DDLC's Lua file: Monika -port \"script-ch0.po\" \"script-ch0.lua\"");
+                Info();
                 return;
             }
             switch (args[0])
             {
                 case "-export":
-
-                    if (args.Length != 3 || string.IsNullOrWhiteSpace(args[2]))
-                    {
-                        
-                    }
                     if (File.Exists(args[1]))
                     {
-                        
-                        // 1
-                        Node nodo = NodeFactory.FromFile(args[1]); // BinaryFormat
-
-                        // 2
-                        IConverter<BinaryFormat, Rpy.Rpy> TextConverter = new Rpy.BinaryFormat2Rpy { };
-                        Node nodoRpy = nodo.Transform(TextConverter);
-
-                        // 3
-                        IConverter<Rpy.Rpy, Po> PoConverter = new Rpy.Rpy2Po { };
-                        Node nodoPo = nodoRpy.Transform(PoConverter);
-
-                        //4
-                        Console.WriteLine("Exporting " + args[1] + "...");
-                        string file = args[1].Remove(args[1].Length - 4);
-                        nodoPo.Transform<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(file + ".po");
+                        ExportRpy(args[1]);
                     }
                     break;
                 case "-import":
                     if (File.Exists(args[1]))
                     {
-                        // 1
-                        Node nodo = NodeFactory.FromFile(args[1]); // Po
-                        nodo.Transform<Po2Binary, BinaryFormat, Po>();
-
-                        // 2
-                        IConverter<Po, Rpy.Rpy> PoConverter = new Rpy.Po2Rpy { };
-                        Node nodoRpy = nodo.Transform(PoConverter);
-
-                        // 3
-                        IConverter<Rpy.Rpy, BinaryFormat> RpyConverter = new Rpy.Rpy2BinaryFormat { };
-                        Node nodoFile = nodoRpy.Transform(RpyConverter);
-                        //3
-                        Console.WriteLine("Importing " + args[1] + "...");
-                        string file = args[1].Remove(args[1].Length - 3);
-                        nodoFile.Stream.WriteTo(file + "_new.rpy");
+                        ImportRpy(args[1]);
                     }
                     break;
                 case "-fix_import":
                     if (File.Exists(args[1]) && File.Exists(args[2]))
                     {
-                        // 1
-                        Node nodoPo = NodeFactory.FromFile(args[1]); // Po
-                        nodoPo.Transform<Po2Binary, BinaryFormat, Po>();
-
-                        Node nodoOr = NodeFactory.FromFile(args[2]); // BinaryFormat
-
-
-                        // 2
-                        IConverter<BinaryFormat, Rpy.Rpy> TextConverter = new Rpy.BinaryFormat2Rpy {
-
-                            PoFix = nodoPo.GetFormatAs<Po>()
-
-                        };
-                        Node nodoRpy = nodoOr.Transform(TextConverter);
-
-                        // 3
-                        IConverter<Rpy.Rpy, BinaryFormat> RpyConverter = new Rpy.Rpy2BinaryFormat { };
-                        Node nodoFile = nodoRpy.Transform(RpyConverter);
-                        //3
-                        Console.WriteLine("Importing " + args[1] + "...");
-                        string file = args[1].Remove(args[1].Length - 3);
-                        nodoFile.Stream.WriteTo(file + "_new.rpy");
+                       ImportRpyFix(args[0], args[1]);
                     }
                     break;
                 case "-port":
                     if (File.Exists(args[1]) && File.Exists(args[2]))
                     {
-                        // 1
-                        Node nodo = NodeFactory.FromFile(args[1]); // Po
-                        nodo.Transform<Po2Binary, BinaryFormat, Po>();
-
-                        // 2
-                        Lua.Po2Lua importer = new Lua.Po2Lua
-                        {
-                            LuaFile = new Yarhl.IO.TextReader(new DataStream(args[2], FileOpenMode.Read), Encoding.UTF8)
-                        };
-
-                        Node nodoDat = nodo.Transform(importer);
-
-                        //3
-                        Console.WriteLine("Importing " + args[1] + "...");
-                        string file = args[1].Remove(args[1].Length - 4);
-                        nodoDat.Stream.WriteTo(file + "_new.lua");
+                       Port(args[1], args[2]);
                     }
                     break;
             }
+        }
+
+        public static void ExportRpy(string rpy)
+        {
+            // 1
+            var nodo = NodeFactory.FromFile(rpy); // BinaryFormat
+
+            // 2
+            IConverter<BinaryFormat, Rpy.Rpy> textConverter = new BinaryFormat2Rpy();
+            var nodoRpy = nodo.Transform(textConverter);
+
+            // 3
+            IConverter<Rpy.Rpy, Po> poConverter = new Rpy2Po();
+            var nodoPo = nodoRpy.Transform(poConverter);
+
+            //4
+            Console.WriteLine("Exporting " + rpy + "...");
+            var file = rpy.Remove(rpy.Length - 4);
+            nodoPo.Transform<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(file + ".po");
+        }
+
+        public static void ImportRpy(string po)
+        {
+            // 1
+            Node nodo = NodeFactory.FromFile(po); // Po
+            nodo.Transform<Po2Binary, BinaryFormat, Po>();
+
+            // 2
+            IConverter<Po, Rpy.Rpy> poConverter = new Po2Rpy();
+            Node nodoRpy = nodo.Transform(poConverter);
+
+            // 3
+            IConverter<Rpy.Rpy, BinaryFormat> rpyConverter = new Rpy2BinaryFormat();
+            Node nodoFile = nodoRpy.Transform(rpyConverter);
+            //3
+            Console.WriteLine("Importing " + po + "...");
+            string file = po.Remove(po.Length - 3);
+            nodoFile.Stream.WriteTo(file + "_new.rpy");
+        }
+
+        public static void ImportRpyFix(string po, string rpy)
+        {
+            // 1
+            Node nodoPo = NodeFactory.FromFile(po); // Po
+            nodoPo.Transform<Po2Binary, BinaryFormat, Po>();
+
+            Node nodoOr = NodeFactory.FromFile(rpy); // BinaryFormat
+
+
+            // 2
+            IConverter<BinaryFormat, Rpy.Rpy> textConverter = new BinaryFormat2Rpy {
+
+                PoFix = nodoPo.GetFormatAs<Po>()
+
+            };
+            Node nodoRpy = nodoOr.Transform(textConverter);
+
+            // 3
+            IConverter<Rpy.Rpy, BinaryFormat> rpyConverter = new Rpy2BinaryFormat();
+            Node nodoFile = nodoRpy.Transform(rpyConverter);
+            //3
+            Console.WriteLine("Importing " + po + "...");
+            string file = po.Remove(po.Length - 3);
+            nodoFile.Stream.WriteTo(file + "_new.rpy");
+        }
+
+        public static void Port(string po, string lua)
+        {
+            Console.WriteLine("\n\nWARNING, THIS FUNCTION IS ON ALPHA STAGE, DO NOT USE FOR NOW!!!!\n\n");
+            // 1
+            Node nodo = NodeFactory.FromFile(po); // Po
+            nodo.Transform<Po2Binary, BinaryFormat, Po>();
+
+            // 2
+            Po2Lua importer = new Po2Lua
+            {
+                LuaFile = new TextReader(new DataStream(lua, FileOpenMode.Read), Encoding.UTF8)
+            };
+
+            Node nodoDat = nodo.Transform(importer);
+
+            //3
+            Console.WriteLine("Importing " + po + "...");
+            string file = po.Remove(po.Length - 3);
+            nodoDat.Stream.WriteTo(file + "_new.lua");
+        }
+
+        public static void Info()
+        {
+            Console.WriteLine("\nUsage: Monika <-export/-import>");
+            Console.WriteLine("Export Rpy to Po: Monika -export \"script-ch0.rpy\"");
+            Console.WriteLine("Export Po to Rpy: Monika -import \"script-ch0.po\"");
+            Console.WriteLine("Fix Po import if the translation program (Like PoEdit) broke the Po: Monika -fix_import \"script-ch0.po\" \"script-ch0.rpy\"");
+            Console.WriteLine("Port Po to Luke DDLC's Lua file: Monika -port \"script-ch0.po\" \"script-ch0.lua\"");
         }
     }
 }
