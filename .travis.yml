@@ -1,5 +1,7 @@
 ## Travis CI Integration
 language: csharp
-after_script:
-  - dotnet build
-  - dotnet test
+mono: none
+dotnet: 3.0.100
+script:
+ - dotnet build
+ - dotnet test
