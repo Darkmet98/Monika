@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Monika.Exceptions;
 using Yarhl.FileFormat;
 using Yarhl.IO;
 using Yarhl.Media.Text;
@@ -46,10 +47,11 @@ namespace Monika.Rpy
             Result = new Rpy();
             Reader = new TextReader(source.Stream, Encoding.UTF8);
 
-            //Skip the first line
-            Reader.ReadLine();
+            //Check if a Rpy file
+            var check = Reader.ReadLine();
+            if (!check.Contains("# TODO: Translation updated at ")) throw new NotRpyFile();
 
-            //Initialize the Count
+                //Initialize the Count
             Count = 0;
             do
             {

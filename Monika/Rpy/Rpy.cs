@@ -26,11 +26,11 @@ namespace Monika.Rpy
     {
         public string Date => "# TODO: Translation updated at " + Convert.ToDateTime(DateTime.Now.ToString("yyyy/M/dd ") + DateTime.Now.ToString("hh:mm:ss")).ToString("yyyy-MM-dd HH:mm") + "\r\n\r\n";
         public bool IsSelection { get; set; }
-        public string Language { get; set; }
-        public List<string> OriginalText { get; set; }
-        public List<string> TranslatedText { get; set; }
-        public List<string> Variables { get; set; }
-        public List<string> Names { get; set; }
+        private string Language { get; set; }
+        public List<string> OriginalText { get; }
+        public List<string> TranslatedText { get; }
+        public List<string> Variables { get; }
+        public List<string> Names { get; }
 
         public Rpy()
         {
@@ -63,14 +63,20 @@ namespace Monika.Rpy
             return result;
         }
 
+        private string GetLanguage()
+        {
+            var result = Variables[0].Split(' ');
+            return result[2];
+        }
+        
         public string WriteSelection(int i)
         {
             string result = "";
             if(!IsSelection)
             {
                 IsSelection = true;
-                //Por ahora voy a hacerlo para DDLC, luego lo hago universal
-                result += "translate Spanish strings:\r\n\r\n";
+                Language = GetLanguage();
+                result += "translate " + Language + " strings:\r\n\r\n";
             }
             result += Variables[i] + "\r\n";
             result += "    old \"" + FixString(OriginalText[i]) + "\"\r\n";
