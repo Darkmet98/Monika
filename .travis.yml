@@ -1,7 +1,5 @@
 ## Travis CI Integration
 language: csharp
-solution: Monika.sln
-install:
-  - nuget restore Monika.sln
-  - nuget install Yarhl -Version 2.0.0.1
-  - nuget install Yarhl.Media -Version 2.0.0.1
+after_script:
+  - dotnet build
+  - dotnet test
