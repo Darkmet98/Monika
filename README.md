@@ -36,3 +36,4 @@ Read the wiki
 
 # Credits
 * Thanks to Pleonex for Yarhl libraries.
+* Team Salvato for Monika sprite.
