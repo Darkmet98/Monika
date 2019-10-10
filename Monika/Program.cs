@@ -34,11 +34,11 @@ namespace Monika
             Console.WriteLine("This program is licensed with a GPL V3 license.");
             if (args.Length != 1 && args.Length != 2 && args.Length != 3)
             {
-                Console.WriteLine("\nUsage: Monika.exe <-export/-import>");
-                Console.WriteLine("Export Rpy to Po: Monika.exe -export \"script-ch0.rpy\"");
-                Console.WriteLine("Export Po to Rpy: Monika.exe -import \"script-ch0.po\"");
-                Console.WriteLine("Fix Po import if the translation program (Like PoEdit) broke the Po: Monika.exe -import \"script-ch0.po\" \"script-ch0.rpy\"");
-                Console.WriteLine("Port Po to Luke DDLC's Lua file: Monika.exe -port \"script-ch0.po\" \"script-ch0.lua\"");
+                Console.WriteLine("\nUsage: Monika <-export/-import>");
+                Console.WriteLine("Export Rpy to Po: Monika -export \"script-ch0.rpy\"");
+                Console.WriteLine("Export Po to Rpy: Monika -import \"script-ch0.po\"");
+                Console.WriteLine("Fix Po import if the translation program (Like PoEdit) broke the Po: Monika -fix_import \"script-ch0.po\" \"script-ch0.rpy\"");
+                Console.WriteLine("Port Po to Luke DDLC's Lua file: Monika -port \"script-ch0.po\" \"script-ch0.lua\"");
                 return;
             }
             switch (args[0])
