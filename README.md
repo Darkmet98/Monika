@@ -9,7 +9,7 @@ A simple exporter and importer for RenPy Translations to work with CAT Tools.
 
 ## 1.1
 * First public release
-* Added a custom dictionary to work with all name games.
+* Added a custom dictionary to work with all character name games.
 * WIP DDLC LovePotion Port languages.
 * Ported to Net Core 3.
 
