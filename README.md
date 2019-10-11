@@ -1,5 +1,5 @@
 ![Monika](https://github.com/Darkmet98/Monika/blob/master/MonikaBanner.jpg?raw=true)
-# Monika [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+# Monika [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Build Status](https://travis-ci.com/Darkmet98/Monika.svg?branch=master)](https://travis-ci.com/Darkmet98/Monika)
 A simple exporter and importer for RenPy Translations to work with CAT Tools.
 
 # Version
