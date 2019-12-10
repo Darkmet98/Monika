@@ -156,8 +156,8 @@ namespace Monika
 
         public static void Info()
         {
-            Console.WriteLine("\nUsage: Monika <-export/-import>");
-            Console.WriteLine("Export Rpy to Po: Monika -export \"script-ch0.rpy\"");
+            Console.WriteLine("\nUsage: Monika <-export/-import> \"File1\" \"File2\" ");
+            Console.WriteLine("Export Rpy to Po: Monika -export \"script-ch0.rpy\" ");
             Console.WriteLine("Export Po to Rpy: Monika -import \"script-ch0.po\"");
             Console.WriteLine("Fix Po import if the translation program (Like PoEdit) broke the Po: Monika -fix_import \"script-ch0.po\" \"script-ch0.rpy\"");
             Console.WriteLine("Port Po to Luke DDLC's Lua file: Monika -port \"script-ch0.po\" \"script-ch0.lua\"");

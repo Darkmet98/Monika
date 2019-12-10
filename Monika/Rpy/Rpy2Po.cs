@@ -28,12 +28,14 @@ namespace Monika.Rpy
 
         public Rpy2Po()
         {
+            //Read the language used by the user' OS, this way the editor can spellcheck the translation. - Thanks Liquid_S por the code
+            System.Globalization.CultureInfo currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
             po = new Po
             {
                 //Por ahora me voy a centrar en hacerlo para DDLC, luego lo hago universal
-                Header = new PoHeader("Doki Doki Literature Club", "glowtranslations@gmail.com", "es")
+                Header = new PoHeader("A renpy game", "anyemail@gmail.com", currentCulture.Name)
                 {
-                    LanguageTeam = "GlowTranslations"
+                    LanguageTeam = "AnyTeam"
                 }
             };
         }
@@ -49,7 +51,7 @@ namespace Monika.Rpy
                 if (!String.IsNullOrEmpty(source.TranslatedText[i])) entry.Translated = source.TranslatedText[i];
                 entry.ExtractedComments = source.Names[i];
                 //Exclusivo para DDLC, luego lo haré configurable
-                entry.Flags = "game-doki, max-length:191";
+                //entry.Flags = "game-doki, max-length:191";
                 po.Add(entry);
             }
 
