@@ -13,6 +13,10 @@ A simple exporter and importer for RenPy Translations to work with CAT Tools.
 * WIP DDLC LovePotion Port languages.
 * Ported to Net Core 3.
 
+## 1.2
+* -Fixes #1 on the import_fix
+* -Added automatic language switcher on the po generator function (thanks @Liquid-S )
+
 # Usage
 
 ## Renpy Files
