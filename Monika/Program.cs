@@ -57,7 +57,7 @@ namespace Monika
                 case "-fix_import":
                     if (File.Exists(args[1]) && File.Exists(args[2]))
                     {
-                       ImportRpyFix(args[0], args[1]);
+                       ImportRpyFix(args[1], args[2]);
                     }
                     break;
                 case "-port":
