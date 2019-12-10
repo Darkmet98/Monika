@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,11 +8,20 @@
     <Authors>Darkmet</Authors>
     <Copyright>GPL V3</Copyright>
     <PackageProjectUrl>https://github.com/Darkmet98/Monika/</PackageProjectUrl>
-    <Version>1.0.1</Version>
+    <Version>1.2</Version>
+    <RepositoryUrl>https://github.com/Darkmet98/Monika/</RepositoryUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Yarhl" Version="2.0.0.1" />
     <PackageReference Include="Yarhl.Media" Version="2.0.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\MetatronCVM\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 </Project>
