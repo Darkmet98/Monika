@@ -37,6 +37,7 @@ Read the wiki
 * Hiveswap Friendsim
 * Pesterquest
 * Souda Love Revolution
+* DDLC "Our Time"
 
 # Credits
 * Thanks to Pleonex for Yarhl libraries.
