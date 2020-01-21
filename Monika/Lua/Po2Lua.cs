@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2019 Pedro Garau Martínez
+﻿// Copyright (C) 2020 Pedro Garau Martínez
 //
 // This file is part of Monika.
 //
@@ -21,98 +21,94 @@ using System.Text;
 using Yarhl.FileFormat;
 using Yarhl.IO;
 using Yarhl.Media.Text;
+using TextWriter = Yarhl.IO.TextWriter;
+
+// ReSharper disable IdentifierTypo
 
 namespace Monika.Lua
 {
     class Po2Lua : IConverter<Po, BinaryFormat>
     {
-        public TextReader LuaFile { get; set; }
+        public string[] LuaFile { get; set; }
+        private string[] TranslatedTextAdapted { get; set; }
+        private string[] OriginalTextAdapted { get; set; }
+        private Po Po { get; set; }
 
         public BinaryFormat Convert(Po source)
         {
-            var result = new BinaryFormat();
-            var Writer = new TextWriter(result.Stream, Encoding.UTF8);
-            int i = 0;
-            string TextFinal = "";
-            do
-            {
-                if (CheckIfText(LuaFile.PeekLine()) && i < source.Entries.Count && !(source.Entries[i].ExtractedComments.Equals("System text or election")
-                    || source.Entries[i].ExtractedComments.Equals("Selection")))
-                {
+            
+            Po = source;
+            GeneratePortedText();
+            PortTranslation();
 
-                    TextFinal += "\t\tcw(\'" + ReturnName(source.Entries[i].ExtractedComments) + "\', \"" + DeleteUnnecesaryThings(ReplaceText(source.Entries[i].Translated)) + "\")\n";
-                    i++;
-                    LuaFile.ReadLine();
-                }
-                else TextFinal += LuaFile.ReadLine() + "\n";
-            }
-            while (!LuaFile.Stream.EndOfStream);
-
-            for(i = 0; i < source.Entries.Count; i++ )
-            {
-                if (source.Entries[i].ExtractedComments.Equals("System text or election")|| source.Entries[i].ExtractedComments.Equals("Selection")) {
-                    TextFinal = TextFinal.Replace(DeleteUnnecesaryThings(ReplaceText(source.Entries[i].Original)), DeleteUnnecesaryThings(ReplaceText(source.Entries[i].Translated)));
-                }
-            }
-
-            Writer.Write(TextFinal);
-
-            /*FileText = ReplaceText(LuaFile.ReadToEnd(), true);
-            FileText = DeleteUnnecesaryThings(FileText, true);
-
-            for (int i = 0; i < source.Entries.Count; i++)
-            {
-                string OriginalText = DeleteUnnecesaryThings(source.Entries[i].Original, false);
-                if (!String.IsNullOrEmpty(source.Entries[i].Translated))
-                FileText = FileText.Replace(OriginalText, DeleteUnnecesaryThings(ReplaceText(source.Entries[i].Translated, false), false));
-            }
-
-            Writer.Write(FileText);*/
-            return result;
+            return GenerateBinary();
         }
 
-        private string ReplaceText(string line)
+
+        private void GeneratePortedText()
+        {
+            TranslatedTextAdapted = new string[Po.Entries.Count];
+            OriginalTextAdapted = new string[Po.Entries.Count];
+
+            for (int i = 0; i < Po.Entries.Count; i++)
+            {
+                OriginalTextAdapted[i] = ReplaceText(DeleteUnnecesaryThings(Po.Entries[i].Original), _variables);
+                TranslatedTextAdapted[i] = ReplaceText(DeleteUnnecesaryThings(Po.Entries[i].Translated), _variables);
+            }
+        }
+
+        private void PortTranslation()
+        {
+            var start = 0;
+            for (int i = 0; i < OriginalTextAdapted.Length; i++)
+            {
+                for (int j = start; j < LuaFile.Length; j++)
+                {
+                    var checkText = ReplaceText(LuaFile[j], _fixVariables);
+                    if (checkText.Contains(OriginalTextAdapted[i]))
+                    {
+                        LuaFile[j] = "\t\tcw(\'" + ReturnName(Po.Entries[i].ExtractedComments) + "\', \"" + TranslatedTextAdapted[i] + "\")";
+                        //start = j+1;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private string ReplaceText(string line, Dictionary<string,string> dic)
         {
             string result = line;
-            foreach (var replace in Variables)
+            foreach (var replace in dic)
             {
-                result = result.Replace(replace.Value, replace.Key);
+                result = result.Replace(replace.Key, replace.Value);
             }
             return result;
         }
 
-        private bool CheckIfText(string line)
+        private BinaryFormat GenerateBinary()
         {
-            if (line.Contains("cw(")) return true;
-            else if (line.Contains("y \"")) return true;
-            else if (line.Contains("n \"")) return true;
-            else if (line.Contains("mc \"")) return true;
-            else if (line.Contains("bl \"")) return true;
-            else if (line.Contains("s \"")) return true;
-            else if (line.Contains("m \"")) return true;
-            else return false;
+            var result = new TextWriter(new DataStream(), Encoding.UTF8) {NewLine = "\r\n"};
+            foreach (var text in LuaFile)
+            {
+             result.WriteLine(text);   
+            }
+            return new BinaryFormat(result.Stream);
         }
 
         private string ReturnName(string name)
         {
-            switch (name)
+            return name switch
             {
-                case "Sayori":
-                    return "s";
-                case "Protagonist": //Old version
-                case "Main Character":
-                    return "mc";
-                case "Yuri":
-                    return "y";
-                case "Narrator":
-                    return "bl";
-                case "Natsuki":
-                    return "n";
-                case "Monika":
-                    return "m";
-                default:
-                    return "???";
-            }
+                "Sayori" => "s",
+                "Protagonist" => //Old version
+                "mc",
+                "Main Character" => "mc",
+                "Yuri" => "y",
+                "Narrator" => "bl",
+                "Natsuki" => "n",
+                "Monika" => "m",
+                _ => "???"
+            };
         }
 
         private string DeleteUnnecesaryThings(string line)
@@ -120,32 +116,23 @@ namespace Monika.Lua
             return line.Replace("{i}", "").Replace("{/i}", "");
         }
 
-        private Dictionary<string, string> Variables = new Dictionary<string, string>()
+        private readonly Dictionary<string, string> _variables = new Dictionary<string, string>()
         {
-            {"\"..player..\"", "[player]" },
-            {"\"..ch2_winner..\"", "[ch2_winner]"},
-            {"\\'", "'"},
-            {"%", "%%"},
+            {"[player]", "\" .. player .. \""  },
+            {"[ch2_winner]", "\"..ch2_winner..\""},
+            {"%%", "%"},
         };
 
-        /*private string DeleteUnnecesaryThings(string line, bool Original)
+        private readonly Dictionary<string, string> _fixVariables = new Dictionary<string, string>()
         {
-            if (!Original)
-                return line.Replace("{i}", "").Replace("{/i}", "");
-            else
-                return line.Replace("  ", " ").Replace("''", "'");
-        }
-
-        private Dictionary<string, string> Variables = new Dictionary<string, string>()
-        {
-            {"\"..player..\"", "[player]" },
-            {"\" .. player .. \"", "[player]" },
-            {"\" .. player .. \'", "[player]" },
-            {"\' .. player .. \"", "[player]" },
-            {"\' .. player .. \'", "[player]" },
-            {"\"..ch2_winner..\"", "[ch2_winner]"},
-            {"\\'", "'"},
-            {"%", "%%"},
-        };*/
+            {"\\'", "\'"  },
+            {"' .. player .. '", "\" .. player .. \"" },
+            {"\" .. player .. \'", "\" .. player .. \"" },
+            {"\"..player..\"", "\" .. player .. \"" },
+            {"'..player..'", "\" .. player .. \"" },
+            {"'.. player .. '", "\" .. player .. \"" },
+            {",player .. '", ",\" .. player .. \""  },
+            {",player..\"", ",\" .. player .. \""  }
+        };
     }
 }

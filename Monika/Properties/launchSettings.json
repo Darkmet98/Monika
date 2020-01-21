@@ -2,7 +2,7 @@
   "profiles": {
     "Monika": {
       "commandName": "Project",
-      "commandLineArgs": "-fix_import \"script-ch1.po\" \"script-ch1.rpy\""
+      "commandLineArgs": "-port script-ch3.po script-ch3.lua"
     }
   }
 }

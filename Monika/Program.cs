@@ -143,7 +143,7 @@ namespace Monika
             // 2
             Po2Lua importer = new Po2Lua
             {
-                LuaFile = new TextReader(new DataStream(lua, FileOpenMode.Read), Encoding.UTF8)
+                LuaFile = File.ReadAllLines(lua)
             };
 
             Node nodoDat = nodo.Transform(importer);
