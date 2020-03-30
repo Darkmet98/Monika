@@ -97,29 +97,38 @@ namespace Monika.Lua
 
         private string ReturnName(string name)
         {
-            return name switch
+            switch (name)
             {
-                "Sayori" => "s",
-                "Protagonist" => //Old version
-                "mc",
-                "Main Character" => "mc",
-                "Yuri" => "y",
-                "Narrator" => "bl",
-                "Natsuki" => "n",
-                "Monika" => "m",
-                _ => "???"
-            };
+                case "Sayori":
+                    return "s";
+                case "Protagonist":
+                case "Main Character":
+                    return "mc";
+                case "Yuri":
+                    return "y";
+                case "Narrator":
+                    return "bl";
+                case "Natsuki":
+                    return "n";
+                case "Monika":
+                    return "m";
+                default:
+                    return "???";
+            }
         }
 
         private string DeleteUnnecesaryThings(string line)
         {
-            return line.Replace("{i}", "").Replace("{/i}", "");
+            return line.Replace("{i}", "").Replace("{/i}", "").Replace("{nw}", "").Replace("{fast}", "");
         }
 
         private readonly Dictionary<string, string> _variables = new Dictionary<string, string>()
         {
             {"[player]", "\" .. player .. \""  },
             {"[ch2_winner]", "\"..ch2_winner..\""},
+            {"[ch4_name]", "\"..savevalue..\""},
+            {"[s_name]", "\"..s_name..\""},
+            {"[currentuser]", "\"..currentuser..\""},
             {"%%", "%"},
         };
 

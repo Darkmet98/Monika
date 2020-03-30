@@ -2,7 +2,7 @@
   "profiles": {
     "Monika": {
       "commandName": "Project",
-      "commandLineArgs": "-port script-ch3.po script-ch3.lua"
+      "commandLineArgs": "-port script-ch0.po script-ch0.lua"
     }
   }
 }
