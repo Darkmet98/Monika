@@ -33,7 +33,7 @@ namespace Monika
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Monika — A easy toolkit for RenPy games for fantranslations by Darkmet98.\nThanks to Pleonex for Yarhl libraries.\nVersion: 1.2");
+            Console.WriteLine("Monika — A easy toolkit for RenPy games for fantranslations by Darkmet98.\nThanks to Pleonex for Yarhl libraries.\nVersion: 1.3");
             Console.WriteLine("This program is licensed with a GPL V3 license.");
             if (args.Length != 1 && args.Length != 2 && args.Length != 3)
             {

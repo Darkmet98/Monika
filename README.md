@@ -14,8 +14,12 @@ A simple exporter and importer for RenPy Translations to work with CAT Tools.
 * Ported to Net Core 3.
 
 ## 1.2
-* -Fixes #1 on the import_fix
-* -Added automatic language switcher on the po generator function (thanks @Liquid-S )
+* Fixes #1 on the import_fix
+* Added automatic language switcher on the po generator function (thanks @Liquid-S )
+
+## 1.2
+* Fixed crash on null entries
+* Bumped to Net Core 3.1 and Net Framework 4.8
 
 # Usage
 
@@ -38,6 +42,7 @@ Read the wiki
 * Pesterquest
 * Souda Love Revolution
 * DDLC "Our Time"
+* Echo
 
 # Credits
 * Thanks to Pleonex for Yarhl libraries.
