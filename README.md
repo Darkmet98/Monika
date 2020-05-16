@@ -17,7 +17,7 @@ A simple exporter and importer for RenPy Translations to work with CAT Tools.
 * Fixes #1 on the import_fix
 * Added automatic language switcher on the po generator function (thanks @Liquid-S )
 
-## 1.2
+## 1.3
 * Fixed crash on null entries
 * Bumped to Net Core 3.1 and Net Framework 4.8
 
