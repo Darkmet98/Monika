@@ -32,13 +32,13 @@ namespace Monika.Rpy
 
             foreach (var entry in source.Entries)
             {
-                Result.OriginalText.Add(entry.Original);
+                Result.OriginalText.Add((entry.Original!= "<!empty>")?entry.Original:"");
 
                 Result.Variables.Add(entry.Reference);
 
                 Result.Names.Add(entry.ExtractedComments);
 
-                if (!String.IsNullOrEmpty(entry.Translated)) Result.TranslatedText.Add(entry.Translated);
+                if (!String.IsNullOrEmpty(entry.Translated)) Result.TranslatedText.Add((entry.Translated != "<!empty>")?entry.Translated:"");
 
                 else Result.TranslatedText.Add("NULL");
 

@@ -45,10 +45,10 @@ namespace Monika.Rpy
             for(int i = 0; i < source.OriginalText.Count; i++)
             {
                 PoEntry entry = new PoEntry();
-                entry.Context = i.ToString() + "|" + source.Names[i];
+                entry.Context = i + "|" + source.Names[i];
                 entry.Reference = source.Variables[i];
-                entry.Original = source.OriginalText[i];
-                if (!String.IsNullOrEmpty(source.TranslatedText[i])) entry.Translated = source.TranslatedText[i];
+                entry.Original = (!string.IsNullOrEmpty(source.OriginalText[i]))?source.OriginalText[i]: "<!empty>";
+                if (!string.IsNullOrEmpty(source.TranslatedText[i])) entry.Translated = source.TranslatedText[i];
                 entry.ExtractedComments = source.Names[i];
                 //Exclusivo para DDLC, luego lo haré configurable
                 //entry.Flags = "game-doki, max-length:191";
