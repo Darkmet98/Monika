@@ -1,40 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
-    <TargetFrameworks>net48;netcoreapp3.1</TargetFrameworks>
-    <Title>Monika</Title>
-    <Authors>Darkmet</Authors>
-    <Copyright>GPL V3</Copyright>
-    <PackageProjectUrl>https://github.com/Darkmet98/Monika/</PackageProjectUrl>
-    <Version>1.2</Version>
-    <RepositoryUrl>https://github.com/Darkmet98/Monika/</RepositoryUrl>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Prefer32Bit>true</Prefer32Bit>
-    <PlatformTarget>x86</PlatformTarget>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Yarhl" Version="2.0.0.1" />
-    <PackageReference Include="Yarhl.Media" Version="2.0.0.1" />
-	 <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-      </PackageReference>
+    <PackageReference Include="Yarhl" Version="3.1.0" />
+    <PackageReference Include="Yarhl.Media" Version="3.1.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\..\..\MetatronCVM\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
 </Project>

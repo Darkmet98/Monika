@@ -1,37 +1,25 @@
-﻿// Copyright (C) 2019 Pedro Garau Martínez
-//
-// This file is part of Monika.
-//
-// Monika is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Monika is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Monika. If not, see <http://www.gnu.org/licenses/>.
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Text;
 using Monika.Exceptions;
 using Yarhl.FileFormat;
 using Yarhl.IO;
 using Yarhl.Media.Text;
+using TextReader = Yarhl.IO.TextReader;
 
 namespace Monika.Rpy
 {
-    class BinaryFormat2Rpy : IConverter<BinaryFormat, Rpy>
+    public class BinaryFormat2Rpy : IConverter<BinaryFormat, Rpy>
     {
         TextReader Reader { get; set; }
         Rpy Result { get; set; }
         string Variable { get; set; }
         public Po PoFix { get; set; }
+
+        public string CharactersFile { get; set; } =
+            $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}{Path.DirectorySeparatorChar}Characters.map";
         int Count { get; set; }
         private Dictionary<string, string> Map { get; set; }
 
@@ -42,7 +30,8 @@ namespace Monika.Rpy
         public Rpy Convert(BinaryFormat source)
         {
             //Check if the dictionary exist
-            if (System.IO.File.Exists("Characters.map")) GenerateFontMap("Characters.map");
+            if (File.Exists(CharactersFile))
+                GenerateFontMap(CharactersFile);
             
             Result = new Rpy();
             Reader = new TextReader(source.Stream, Encoding.UTF8);
@@ -51,7 +40,7 @@ namespace Monika.Rpy
             var check = Reader.ReadLine();
             if (!check.Contains("# TODO: Translation updated at ")) throw new NotRpyFile();
 
-                //Initialize the Count
+            //Initialize the Count
             Count = 0;
             do
             {
@@ -147,19 +136,18 @@ namespace Monika.Rpy
         {
             try
             {
-                string[] dictionary = System.IO.File.ReadAllLines(file);
+                var dictionary = File.ReadAllLines(file);
                 foreach (string line in dictionary)
                 {
-                    string[] lineFields = line.Split('=');
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
+                    var lineFields = line.Split('=');
                     Map.Add(lineFields[0], lineFields[1]);
                 }
             }
             catch (Exception e)
             {
-                Console.Beep();
-                Console.WriteLine("The dictionary is wrong, please, check the wiki and fix it.");
-                Console.WriteLine(e);
-                Environment.Exit(-1);
+                throw new Exception($"The dictionary is wrong, please, check the wiki and fix it.\n{e.Message}");
             }
         }
     }
