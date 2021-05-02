@@ -30,6 +30,12 @@ translate Spanish ch1_main_5bff8fb6:
     # "Curl into a furry donut make it to the carpet before i vomit mmmmmm." mw2
     "" mw2
 
+# game/Example.rpy:16
+translate Spanish ch1_main_5bff8fb6:
+
+    # "RANDOM NAME" "Blablablabla 123" mw2
+    "RANDOM NAME" "" mw2
+
 translate Spanish strings:
 
     # Example.rpy:331

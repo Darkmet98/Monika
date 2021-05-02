@@ -11,6 +11,7 @@ namespace Monika.Rpy
 
         public BinaryFormat Convert(Rpy source)
         {
+            source.IsSelection = false;
             //Generate the file
             GenerateFile();
 

@@ -61,29 +61,63 @@ namespace Monika
             nodo.Stream.WriteTo(file + "_new.rpy");
         }
 
-        public static void ImportRpyFix(string po, string rpy)
+        public static (bool, string) ImportRpyFolder(string poFolder)
+        {
+            var nodes = NodeFactory.FromDirectory(poFolder, "*.po", "rpys", true);
+
+            try
+            {
+                Parallel.For(0, nodes.Children.Count, i =>
+                {
+                    
+                    var child = nodes.Children[i].TransformWith(new Binary2Po()); ;
+                    var rpyFile = poFolder + Path.DirectorySeparatorChar + child.Name.Replace(".po", ".rpy");
+                    if (File.Exists(rpyFile))
+                    {
+                        ImportRpyFix(child, NodeFactory.FromFile(rpyFile), poFolder);
+                    }
+                        
+                });
+            }
+            catch (Exception e)
+            {
+                return (false, e.Message);
+            }
+
+            return (true, string.Empty);
+        }
+
+        public static void ImportSingleRpyFix(string po, string rpy, string path = "")
         {
             // 1
             var nodoPo = NodeFactory.FromFile(po).TransformWith(new Binary2Po()); // Po
             var nodoOr = NodeFactory.FromFile(rpy); // BinaryFormat
+            
+            ImportRpyFix(nodoPo, nodoOr, path);
+        }
 
+        private static void ImportRpyFix(Node po, Node rpy, string path)
+        {
+            Console.WriteLine("Importing " + po + "...");
 
-            // 2
+            var outFolder = path + Path.DirectorySeparatorChar + "out";
+
+            if (!Directory.Exists(outFolder))
+                Directory.CreateDirectory(outFolder);
+
+            var file = outFolder + Path.DirectorySeparatorChar + rpy.Name;
+
+            if (File.Exists(file))
+                File.Delete(file);
+
             var textConverter = new BinaryFormat2Rpy
             {
 
-                PoFix = nodoPo.GetFormatAs<Po>()
+                PoFix = po.GetFormatAs<Po>()
 
             };
-            nodoOr.TransformWith(textConverter);
-
-            // 3
-            IConverter<Rpy.Rpy, BinaryFormat> rpyConverter = new Rpy2BinaryFormat();
-            nodoOr.TransformWith(new Rpy2BinaryFormat());
-            //3
-            Console.WriteLine("Importing " + po + "...");
-            string file = po.Remove(po.Length - 3);
-            nodoOr.Stream.WriteTo(file + "_new.rpy");
+            rpy.TransformWith(textConverter).TransformWith(new Rpy2BinaryFormat());
+            rpy.Stream.WriteTo(file);
         }
     }
 }

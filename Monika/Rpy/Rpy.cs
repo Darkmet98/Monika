@@ -22,24 +22,30 @@ namespace Monika.Rpy
             Names = new List<string>();
         }
 
+        private string ori;
+        private string tra;
+        private string[] variables;
+
         public string WriteText(int i)
         {
-            string result = "";
-            string[] var = Variables[i].Split('|');
+            var result = "";
+            ori = FixString(OriginalText[i]);
+            tra = CheckTranslation(i);
+            variables = SubstractName(Variables[i]).Split('|');
 
-            result += var[0] + "\r\n" + var[1] + "\r\n\r\n";
+            result += variables[0] + "\r\n" + variables[1] + "\r\n\r\n";
 
-            if(var.Length == 4)
+            if(variables.Length == 4)
             {
-                result += "    #" + var[2] + "\"" + FixString(OriginalText[i]) + "\""+ var[3] + "\r\n";
+                result += "    #" + variables[2] + "\"" + ori + "\""+ variables[3] + "\r\n";
 
-                result += "   " + var[2] + "\"" + CheckTranslation(i) + "\"" + var[3] + "\r\n\r\n";
+                result += "   " + variables[2] + "\"" + tra + "\"" + variables[3] + "\r\n\r\n";
             }
             else
             {
-                result += "    #" + var[2] + "\"" + FixString(OriginalText[i]) + "\"\r\n";
+                result += "    #" + variables[2] + "\"" + FixString(OriginalText[i]) + "\"\r\n";
 
-                result += "   " + var[2] + "\"" + CheckTranslation(i) + "\"\r\n\r\n";
+                result += "   " + variables[2] + "\"" + CheckTranslation(i) + "\"\r\n\r\n";
             }
 
             return result;
@@ -69,13 +75,34 @@ namespace Monika.Rpy
 
         private string CheckTranslation(int i)
         {
-            if (!TranslatedText[i].Equals("NULL")) return FixString(TranslatedText[i]);
-            else return "";
+            return !TranslatedText[i].Equals("NULL") ? FixString(TranslatedText[i]) : string.Empty;
         }
 
         private string FixString(string text)
         {
             return text.Replace("\n", "\\n").Replace("\\\\", "\\");
+        }
+
+        private string SubstractName(string variable)
+        {
+            if (!variable.Contains("NAMEREPLACING"))
+                return variable;
+
+            if (!string.IsNullOrWhiteSpace(tra) && !tra.Contains("{CHARA="))
+                throw new Exception("You need to place the {CHARA=TEXT} Tag on the translated box.");
+
+            var posEnd = ori.IndexOf("}", StringComparison.InvariantCulture);
+            var name = ori.Substring(0, posEnd).Replace("{CHARA=", "").Replace("}", "");
+            ori = ori.Substring(posEnd+1);
+
+            if (!string.IsNullOrWhiteSpace(tra))
+            {
+                posEnd = tra.IndexOf("}", StringComparison.InvariantCulture);
+                name = tra.Substring(0, posEnd).Replace("{CHARA=", "").Replace("}", "");
+                tra = tra.Substring(posEnd+1);
+            }
+
+            return variable.Replace("NAMEREPLACING", $"\"{name}\" ");
         }
     }
 }

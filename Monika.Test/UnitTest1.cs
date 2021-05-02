@@ -17,6 +17,7 @@ namespace Monika.Test
             "for climb leg sniff all the things lick the \\\"plastic bag\\\" fall asleep on the washing machine good now the other hand, too.",
             "Plays league of legends eat all the power cords.",
             "Curl into a furry donut make it to the carpet before i vomit mmmmmm.",
+            "{CHARA=RANDOM NAME}Blablablabla 123",
             "Example1",
             "Example2"
 
@@ -29,6 +30,7 @@ namespace Monika.Test
             "Fivi",
             "Fivi",
             "Narrator",
+            "NAME REPLACING",
             "Selection",
             "Selection"
         };

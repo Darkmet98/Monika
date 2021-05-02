@@ -45,5 +45,18 @@ namespace Monika.Gui
                 MessageBoxButtons.OK,
                 result.Item1?MessageBoxIcon.Information:MessageBoxIcon.Error);
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            using var openFileDialog = new FolderBrowserDialog();
+
+            if (openFileDialog.ShowDialog() != DialogResult.OK)
+                return;
+            var result = Converter.ImportRpyFolder(openFileDialog.SelectedPath);
+
+            MessageBox.Show(result.Item1 ? "The new rpy files is generated on the po folder." : result.Item2, result.Item1 ? "Success" : "Failed",
+                MessageBoxButtons.OK,
+                result.Item1 ? MessageBoxIcon.Information : MessageBoxIcon.Error);
+        }
     }
 }

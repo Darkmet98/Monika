@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Monika.Exceptions;
@@ -13,9 +14,9 @@ namespace Monika.Rpy
 {
     public class BinaryFormat2Rpy : IConverter<BinaryFormat, Rpy>
     {
-        TextReader Reader { get; set; }
-        Rpy Result { get; set; }
-        string Variable { get; set; }
+        private TextReader reader;
+        private Rpy result;
+        private string variable;
         public Po PoFix { get; set; }
 
         public string CharactersFile { get; set; } =
@@ -33,88 +34,126 @@ namespace Monika.Rpy
             if (File.Exists(CharactersFile))
                 GenerateFontMap(CharactersFile);
             
-            Result = new Rpy();
-            Reader = new TextReader(source.Stream, Encoding.UTF8);
+            result = new Rpy();
+            reader = new TextReader(source.Stream, Encoding.UTF8);
 
             //Check if a Rpy file
-            var check = Reader.ReadLine();
-            if (!check.Contains("# TODO: Translation updated at ")) throw new NotRpyFile();
+            var check = reader.ReadLine();
+            if (!check.Contains("# TODO: Translation updated at "))
+                throw new NotRpyFile();
 
             //Initialize the Count
             Count = 0;
             do
             {
-                if (!string.IsNullOrEmpty(Reader.PeekLine()))
+                if (!string.IsNullOrEmpty(reader.PeekLine()))
                 {
-                    if (Reader.PeekLine().Contains("strings") && !Result.IsSelection)
+                    if (reader.PeekLine().Contains("strings") && !result.IsSelection)
                     {
-                        Result.IsSelection = true;
+                        result.IsSelection = true;
                         //Skip the white line
-                        Reader.ReadLine();
-                        Reader.ReadLine();
+                        reader.ReadLine();
+                        reader.ReadLine();
                     }
 
-                    if (Result.IsSelection)
+                    if (result.IsSelection)
                     {
-                        Result.Variables.Add(Reader.ReadLine());
-                        Result.Names.Add("Selection");
-                        Reader.ReadToToken("\"");
-                        ReadTextToTranslate();
+                        result.Variables.Add(reader.ReadLine());
+                        result.Names.Add("Selection");
+                        reader.ReadToToken("\"");
+                        ReadTextToTranslateD();
                     }
                     else
                     {
                         //Read the two variables
-                        Variable = Reader.ReadLine() + "|" + Reader.ReadLine() + "|";
-                        Reader.ReadLine();
-                        Reader.ReadToToken("#");
-                        string name = Reader.ReadToToken("\"");
-                        Variable += name;
-                        Result.Names.Add(CheckName(name));
+                        variable = reader.ReadLine() + "|" + reader.ReadLine() + "|";
+                        reader.ReadLine();
+                        reader.ReadToToken("#");
+                        var line = reader.ReadLine();
+                        ReadTextToTranslate(line, false);
+                        ReadTextToTranslate(reader.ReadLine(), true);
+                        result.Variables.Add(variable);
+                        /*string name = reader.ReadToToken("\"");
+                        variable += name;
+                        result.Names.Add(CheckName(name));
                         ReadTextToTranslate();
-                        Result.Variables.Add(Variable);
+                        ;*/
                     }
-                    Variable = "";
+                    variable = "";
                     Count++;
                 }
-                else Reader.ReadLine();
+                else reader.ReadLine();
             }
-            while (!Reader.Stream.EndOfStream);
+            while (!reader.Stream.EndOfStream);
 
-            return Result;
+            return result;
         }
 
-        private void ReadTextToTranslate()
+
+        private void ReadTextToTranslate(string line, bool translationZone)
+        {
+            var split = line.Replace("\\\"", "{QUOTES}").Split('\"');
+
+            if (split.Length == 3)
+            {
+                if (!translationZone)
+                {
+                    variable += split[0];
+                    result.Names.Add(CheckName(split[0]));
+                    result.OriginalText.Add(split[1].Replace("{QUOTES}", "\\\""));
+                    variable += "|" + split[2];
+                }
+                else
+                    result.TranslatedText.Add(PoFix == null ? split[1].Replace("{QUOTES}", "\\\"") : PoFix.Entries[Count].Translated);
+
+            }
+            else
+            {
+                if (!translationZone)
+                {
+                    variable += split[0] + "NAMEREPLACING";
+                    result.Names.Add("NAME REPLACING");
+                    result.OriginalText.Add("{CHARA=" + split[1] + "}" + split[3].Replace("{QUOTES}", "\\\""));
+                    variable += "|" + split[4];
+                }
+                else
+                    result.TranslatedText.Add(PoFix == null ? split[3].Replace("{QUOTES}", "\\\"") : PoFix.Entries[Count].Translated);
+
+            }
+        }
+
+        private void ReadTextToTranslateD()
         {
             //Original text
-            string text = Reader.ReadLine();
-            if(text.Remove(0,text.Length - 1).Equals("\"")) Result.OriginalText.Add(text.Remove(text.Length-1));
+            string text = reader.ReadLine();
+            if(text.Remove(0,text.Length - 1).Equals("\"")) result.OriginalText.Add(text.Remove(text.Length-1));
             else
             {
                 int finalPosition = text.IndexOf("\" ");
-                Result.OriginalText.Add(text.Remove(finalPosition));
-                Variable += "|" + text.Remove(0, finalPosition+1);
+                result.OriginalText.Add(text.Remove(finalPosition));
+                variable += "|" + text.Remove(0, finalPosition+1);
             }
 
             //Skip the white line and the first values
-            Reader.ReadToToken("\"");
+            reader.ReadToToken("\"");
 
 
             if(PoFix == null)
             {
                 //Translated text
-                text = Reader.ReadLine();
-                if (text.Remove(0, text.Length - 1).Equals("\"")) Result.TranslatedText.Add(text.Remove(text.Length - 1));
+                text = reader.ReadLine();
+                if (text.Remove(0, text.Length - 1).Equals("\"")) result.TranslatedText.Add(text.Remove(text.Length - 1));
                 else
                 {
                     int finalPosition = text.IndexOf("\" ");
-                    if (finalPosition == 0) Result.TranslatedText.Add(text.Remove(finalPosition));
-                    else Result.TranslatedText.Add(text.Remove(finalPosition));
+                    if (finalPosition == 0) result.TranslatedText.Add(text.Remove(finalPosition));
+                    else result.TranslatedText.Add(text.Remove(finalPosition));
                 }
             }
             else
             {
-                Reader.ReadLine();
-                Result.TranslatedText.Add(PoFix.Entries[Count].Translated);
+                reader.ReadLine();
+                result.TranslatedText.Add(PoFix.Entries[Count].Translated);
             }
         }
 
