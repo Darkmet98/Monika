@@ -52,7 +52,9 @@ namespace Monika.Rpy
                     {
                         result.IsSelection = true;
                         //Skip the white line
-                        reader.ReadLine();
+                        
+                        var line = reader.ReadLine().Split(' ');
+                        result.Language = line[1];
                         reader.ReadLine();
                     }
 

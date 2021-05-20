@@ -8,7 +8,7 @@ namespace Monika.Rpy
     {
         public string Date => "# TODO: Translation updated at " + Convert.ToDateTime(DateTime.Now.ToString("yyyy/M/dd ") + DateTime.Now.ToString("hh:mm:ss")).ToString("yyyy-MM-dd HH:mm") + "\r\n\r\n";
         public bool IsSelection { get; set; }
-        private string Language { get; set; }
+        public string Language { get; set; }
         public List<string> OriginalText { get; }
         public List<string> TranslatedText { get; }
         public List<string> Variables { get; }
@@ -29,7 +29,7 @@ namespace Monika.Rpy
         public string WriteText(int i)
         {
             var result = "";
-            ori = FixString(OriginalText[i]);
+            ori = FixString(OriginalText[i], true);
             tra = CheckTranslation(i);
             variables = SubstractName(Variables[i]).Split('|');
 
@@ -43,7 +43,7 @@ namespace Monika.Rpy
             }
             else
             {
-                result += "    #" + variables[2] + "\"" + FixString(OriginalText[i]) + "\"\r\n";
+                result += "    #" + variables[2] + "\"" + FixString(OriginalText[i], true) + "\"\r\n";
 
                 result += "   " + variables[2] + "\"" + CheckTranslation(i) + "\"\r\n\r\n";
             }
@@ -51,23 +51,16 @@ namespace Monika.Rpy
             return result;
         }
 
-        private string GetLanguage()
-        {
-            var result = Variables[0].Split(' ');
-            return result[2];
-        }
-        
         public string WriteSelection(int i)
         {
             string result = "";
             if(!IsSelection)
             {
                 IsSelection = true;
-                Language = GetLanguage();
                 result += "translate " + Language + " strings:\r\n\r\n";
             }
             result += Variables[i] + "\r\n";
-            result += "    old \"" + FixString(OriginalText[i]) + "\"\r\n";
+            result += "    old \"" + FixString(OriginalText[i], true) + "\"\r\n";
             result += "    new \"" + CheckTranslation(i) + "\"\r\n\r\n";
 
             return result;
@@ -75,12 +68,17 @@ namespace Monika.Rpy
 
         private string CheckTranslation(int i)
         {
-            return !TranslatedText[i].Equals("NULL") ? FixString(TranslatedText[i]) : string.Empty;
+            return !TranslatedText[i].Equals("NULL") ? FixString(TranslatedText[i], false) : string.Empty;
         }
 
-        private string FixString(string text)
+        private string FixString(string text, bool oriText)
         {
-            return text.Replace("\n", "\\n").Replace("\\\\", "\\");
+
+            var result = text.Replace("\n", "\\n");
+            if (!oriText && text.Contains("\\\""))
+                return result;
+
+            return oriText ? result : result.Replace("\"", "\\\"");
         }
 
         private string SubstractName(string variable)
